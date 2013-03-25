@@ -16,7 +16,6 @@
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import pwd
 import sys
 import ConfigParser
 
@@ -57,11 +56,18 @@ def shell_expand_path(path):
 
 p = load_config_file()
 
-active_user   = pwd.getpwuid(os.geteuid())[0]
+if sys.platform == 'win32':
+    active_user   = os.environ["USERNAME"]
+else:
+    import pwd
+    active_user   = pwd.getpwuid(os.geteuid())[0]
+
 
 # Needed so the RPM can call setup.py and have modules land in the
 # correct location. See #1277 for discussion
-if getattr(sys, "real_prefix", None):
+if sys.platform == 'win32':
+    DIST_MODULE_PATH = os.path.join(sys.prefix, 'share\\ansible')
+elif getattr(sys, "real_prefix", None):
     DIST_MODULE_PATH = os.path.join(sys.prefix, 'share/ansible/')
 else:
     DIST_MODULE_PATH = '/usr/share/ansible/'
