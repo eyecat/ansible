@@ -30,8 +30,9 @@ import ansible.constants as C
 import time
 import StringIO
 import stat
-import termios
-import tty
+if sys.platform != 'win32':
+    import termios
+    import tty
 import pipes
 import random
 import difflib
@@ -383,14 +384,18 @@ def version(prog):
 
 def getch():
     ''' read in a single character '''
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
+    if sys.platform == 'win32':
+        import msvcrt
+        return msvcrt.getch()
+    else:
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
 
 ####################################################################
 # option handling code for /usr/bin/ansible and ansible-playbook

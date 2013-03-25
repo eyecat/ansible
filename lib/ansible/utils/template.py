@@ -26,7 +26,9 @@ import ansible.constants as C
 import time
 import subprocess
 import datetime
-import pwd
+import sys
+if sys.platform != 'win32':
+    import pwd
 
 # TODO: refactor this file
 
